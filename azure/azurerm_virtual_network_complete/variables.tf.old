@@ -1,17 +1,18 @@
-resource "azurerm_virtual_network" "vnet" {
-  resource_group_name                                                               = var.vnet_resource_group
-  location                                                                          = var.vnet.vnet_location
-  name                                                                              = var.vnet.vnet_name
-  address_space                                                                     = var.vnet.vnet_address_space
-  dns_servers                                                                       = var.vnet.vnet_dns != [] ? var.vnet.vnet_dns : []
-  bgp_community                                                                     = var.vnet.vnet_bgp_community != null ? var.vnet.vnet_bgp_community : null
-  dynamic "ddos_protection_plan" {
-    for_each                                                                        = var.vnet.vnet_ddos_protection_plan != [] ? var.vnet.vnet_ddos_protection_plan : []
+variable "vnet" {
+  type = object({ 
+    vnet_location                                                                   = string
+    vnet_name                                                                       = string
+    vnet_address_space                                                              = list(string)
+    vnet_dns                                                                        = list(string)
+    vnet_bgp_community                                                              = string
+    vnet_ddos_protection_plan                                                       = list(object({
+      ddos_id                                                                       = string
+      ddos_enable                                                                   = bool
+    }))
+    vnet_tags                                                                       = map(string)
+  })
+}
 
-    content {
-      id                                                                            = ddos_protection_plan.value.ddos_id
-      enable                                                                        = ddos_protection_plan.value.ddos_enable
-    }
-  }
-  tags                                                                              = var.vnet.vnet_tags != null ? var.vnet.vnet_tags : null
+variable "vnet_resource_group" {
+  type                                                                              = string
 }
